@@ -142,57 +142,49 @@ function gerarChavesRSA_Didaticas(p, q) {
     };
 }
 
-/**
- * Cifra a mensagem usando a chave pública (E, N).
- * Apenas letras A-Z ou a-z são consideradas.
- * @param {string} mensagem - O texto a ser cifrado.
- * @param {number} E - Expoente Público.
- * @param {number} N - Módulo.
- * @returns {number[]} Array de números cifrados.
- */
+// Função correta para cifrar usando RSA
 function cifrarRSA_Didatico(mensagem, E, N) {
-    const resultado = [];
+    let textoNumerico = [];
     for (let i = 0; i < mensagem.length; i++) {
-        let letra = mensagem[i].toUpperCase();
-        let code = letra.charCodeAt(0);
-        if (code >= 65 && code <= 90) { // Só letras A-Z
-            let x = code - 65; // 0-25
-            // Exponenciação modular (x^E % N) sem Math.floor ou função extra
-            let r = 1, b = x, e = E;
-            b = b % N;
-            while (e > 0) {
-                if (e % 2 === 1) r = (r * b) % N;
-                b = (b * b) % N;
-                e = e >> 1; // Divisão inteira por 2
-            }
-            resultado.push(r);
+        let c = mensagem[i];
+        // Se for espaço ou caractere especial, apenas copia
+        if ((c < 'A' || (c > 'Z' && c < 'a') || c > 'z') && c !== ' ') {
+            textoNumerico.push(c);
+        } else if (c === ' ') {
+            textoNumerico.push(' ');
+        } else {
+            let codigo = mensagem.charCodeAt(i);
+            textoNumerico.push(modPow(codigo, E, N));
         }
-        // Ignora não-letras
     }
-    return resultado;
+    return textoNumerico;
 }
 
-/**
- * Decifra o array de números usando a chave privada (D, N).
- * @param {number[]} mensagemCifrada - Array de números cifrados.
- * @param {number} D - Expoente Privado.
- * @param {number} N - Módulo.
- * @returns {string} A string original.
- */
+// Função correta para decifrar usando RSA
 function decifrarRSA_Didatico(mensagemCifrada, D, N) {
-    let resultado = "";
+    let mensagemDescripto = "";
     for (let i = 0; i < mensagemCifrada.length; i++) {
         let c = mensagemCifrada[i];
-        let r = 1, b = c, e = D;
-        b = b % N;
-        while (e > 0) {
-            if (e % 2 === 1) r = (r * b) % N;
-            b = (b * b) % N;
-            e = e >> 1; // Divisão inteira por 2
+        if (typeof c === 'string') {
+            mensagemDescripto += c;
+        } else {
+            let codigo = modPow(c, D, N);
+            mensagemDescripto += String.fromCharCode(codigo);
         }
-        // Garante que o resultado é um índice válido entre 0 e 25
-        let x = ((r % 26) + 26) % 26;
-        resultado += String.fromCharCode(x + 65); // Sempre maiúsculo
     }
-    return resultado;
+    return mensagemDescripto;
+}
+
+// Função auxiliar para exponenciação modular eficiente
+function modPow(base, exp, mod) {
+    let result = 1;
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % 2 === 1) {
+            result = (result * base) % mod;
+        }
+        exp = (exp / 2) | 0; 
+        base = (base * base) % mod;
+    }
+    return result;
 }

@@ -1,4 +1,4 @@
-# Atividade avaliativa CP1 Web Dev
+# Atividade avaliativa CP2 Web Dev
 
 Atividade referente a matéria de desenvolvimento web.
 
